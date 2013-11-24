@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+require('iced-coffee-script');
+require('../lib/cli')(function(e) {
+  console.error(e.message);
+  process.exit(1);
+});

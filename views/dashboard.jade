@@ -1,0 +1,110 @@
+extends layout
+mixin tick(org, server, member, i)
+  td(style='text-align: center; cursor: pointer;',class=i?undefined:'member-active')
+    input.tick(type='checkbox', style='cursor: pointer;', checked=_.contains((orgs[org]||{})[server]||[], member)?'checked':undefined, name='authorization[servers][#{server}][members][#{member}]', disabled=isAdmin?undefined:'disabled')
+mixin member(org, members, member)
+  .btn-group
+    a.dropdown-toggle(href='#', data-toggle="dropdown")
+      .hidden-xs-sm
+        if member.avatar_url
+          img.img-circle(style='width: 30px;',src=member.avatar_url,title=member.login)
+        else
+          img.img-circle(style='width: 30px;',src='assets/github.png',title='#{member.login} is not a member of #{org}')
+      .hidden-lg-md
+        img.img-circle(style='width: 30px;',src=member.avatar_url||'assets/github.png')
+        span(style='margin: 0 .5em;color: #000;text-decoration:none;')=member.login
+        span.caret
+    ul.dropdown-menu.hidden-lg-md(style='text-align: left;')
+      for member in members
+        li
+          a.member-link.clearfix(href='#')
+            img.img-circle(style='width: 25px;',src=member.avatar_url||'assets/github.png')
+            =member.login
+
+mixin org(org)
+  .org
+    form(method='post')
+      - var members = (org.members||[]).concat(orgs_other_members[org.login].map(function(l){return {login: l};}));
+      input(type='hidden',name='authorization[org]',value=org.login)
+      input(type='hidden',name='_csrf',value=_csrf)
+      table.table
+        thead
+          tr
+            th server
+            for member, i in members
+              th(style='text-align: center;',class=i?undefined:'member-active')
+                +member(org.login, members, member)
+        tbody
+          for server_members, server in orgs[org.login]||{}
+            tr
+              td
+                span.hidden-lg-md(style='font-size: .7em;')
+                  =server
+                span.hidden-xs-sm
+                  =server
+                if isAdmin
+                  a(href='?' + params({_method: 'delete', _csrf: _csrf, 'server[org]': org.login, 'server[host]': server}),onclick='return confirm("Are you sure to delete this server? Synced keys will NOT be deleted.")')
+                    i.fa.fa-minus-circle
+                input(type='hidden', name='authorization[servers][#{server}][host]', value=server)
+              for member, i in members
+                +tick(org.login, server, member.login, i)
+    if isAdmin
+      form.form-inline(method='post')
+        input(type='hidden',name='server[org]',value=org.login)
+        input(type='hidden',name='_csrf',value=_csrf)
+        .form-group
+          label.sr-only server host
+          input.form-control(type='email', placeholder='user@host[,port]', name='server[host]')
+        button.btn.btn-success(type='submit')
+          i.fa.fa-plus
+          |Add to #{org.login}
+        
+block content
+  ul.nav.nav-tabs
+    li.dropdown.visible-xs.active
+      a.dropdown-toggle(data-toggle='dropdown',href='#')
+        span#label_org
+          img.img-circle(style='width: 25px;',src=active_org.avatar_url||'assets/github.png')
+          =active_org.login
+        span.caret
+        ul.dropdown-menu
+          for org in user.orgs.concat(other_orgs)
+            li(class=active_org.login==org.login?'active':undefined)
+              a(href="#org_#{org.login}",data-toggle="tab",onclick="$('#label_org').html($(this).html())")
+                img.img-circle(style='width: 25px;',src=org.avatar_url||'assets/github.png')
+                =org.login
+    for org in user.orgs.concat(other_orgs)
+      li.hidden-xs(class=active_org.login==org.login?'active':undefined)
+        a(href="#org_#{org.login}",data-toggle="tab")
+          img.img-circle(style='width: 25px;',src=org.avatar_url||'assets/github.png')
+          =org.login
+  .tab-content
+    for org in user.orgs.concat(other_orgs)
+      .tab-pane.fade(class=active_org.login==org.login?'in active':undefined, id='org_#{org.login}')
+        +org(org)
+  :coffeescript
+    $ ->
+      $('[title]').tooltip()
+      $('.tick').on 'click', (ev)->
+        ev.stopPropagation()
+        $form = $(@).closest('form')
+        $('body').addClass 'waiting'
+        $.ajax
+          url: $form.attr 'action'
+          method: $form.attr 'method'
+          data: $form.serialize()
+          accepts: 
+            '*': 'application/json'
+          error: (xhr)->
+            document.write xhr.responseText
+          complete: ->
+            $('body').removeClass 'waiting'
+      $('.tab-pane.active .form-inline input[type="email"]').focus()
+      $('.member-link').click (ev)->
+        ev.preventDefault()
+        $('.tab-pane.in .org tr>*').removeClass('member-active').filter(":nth-child(#{$(@).parent().index() + 2})").addClass 'member-active'
+      $('.org input[type="checkbox"]').change ->
+        $td = $(@).closest('td').removeClass('success')
+        $td.addClass 'success' if $(@).is ':checked'
+      $('.org input[type="checkbox"]').change().closest('td').click ->
+        $(@).find('input[type="checkbox"]').click()

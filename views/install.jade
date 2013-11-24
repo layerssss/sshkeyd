@@ -1,0 +1,43 @@
+extends layout
+block content
+  h1 Setup
+  h6 you are just one step close!
+  .row
+    .col-md-5
+      .well
+        h2 If you just want to use sshkeyd on <code>localhost:10000</code>
+        p you can use the public sshkeyd GitHub application.
+        pre
+          |Client ID:     950f949e939a6f89c22d
+          |Client Secret: 8623f36909004bbde804afa2aeadd70d321d7be5
+        button.btn.btn-info(onclick='$("#input_client_id").val("950f949e939a6f89c22d");$("#input_client_secret").val("8623f36909004bbde804afa2aeadd70d321d7be5");$("#input_admin_username").focus();') Use it!
+    .col-md-7
+      .well
+        .row
+          .col-lg-6
+            h2 If you want other members to view their privileges..
+            p you can register your own GitHub application and expose your sshkeyd url to them.
+            ol
+              li Go to your GitHub's <em>Account settings</em>
+              li register an application in the <em>Application</em> page, and there you have it.
+          .col-lg-6
+            a.thumbnail(href='assets/install_help.png',target='_blank')
+              img(src='assets/install_help.png')
+  .row
+    .col-sm-8.col-sm-offset-2
+      form(method='post')
+        input(type='hidden',name='_csrf',value=_csrf)
+        .form-group
+          label(for='input_client_id') GitHub application Client ID:
+          input.form-control#input_client_id(type='text',placeholder='Client ID',name='cfg[client_id]')
+        .form-group
+          label(for='input_client_secret') GitHub application Client Secret:
+          input.form-control#input_client_secret(type='text',placeholder='Client Secret',name='cfg[client_secret]')
+        .form-group
+          label(for='input_admin_username') Admin's GitHub Username (yours):
+          input.form-control#input_admin_username(type='text',placeholder='GitHub Username',name='cfg[admin_username]')
+        button.btn.btn-success.btn-block.btn-lg(type='submit')
+          i.fa.fa-thumbs-o-up
+          |OK
+
+

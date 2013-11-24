@@ -1,0 +1,54 @@
+!!! 5
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    title sshkeyd
+    meta(name='viewport', content='width=device-width,initial-scale=0.8, minimum-scale=0.8, maximum-scale=0.8, user-scalable=no')
+    link(rel='stylesheet',href='assets/css/bootswatch-flatly.min.css')
+    link(rel='stylesheet',href='assets/css/font-awesome.min.css')
+    style.
+      body{
+        padding: 5% 2%;
+        position: relative;
+      }
+      body.waiting{
+        cursor: wait;
+      }
+      body.waiting::after{
+        display: block;
+        content: ' ';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        z-index: 1;
+        background-color: #fff;
+        opacity: .6;
+      }
+      @media(max-width: 991px){
+        .org table td:not(:first-child):not(.member-active), .org table th:not(:first-child):not(.member-active){
+          display: none;
+        }
+        .hidden-xs-sm{
+          display: none!important;
+        }
+      }
+      @media(min-width: 992px){
+        .hidden-lg-md{
+          display: none!important;
+        }
+      }
+    script(src='assets/javascript/jquery.min.js')
+    script(src='assets/javascript/bootstrap.min.js')
+  body
+    .panel.panel-default
+      .panel-body
+        block content
+        footer(style='padding: 1.5em 2em 0 2em; color: #aaa; font-size: .8em;') 
+          |powered by 
+          a(href='http://micy.in/sshkeyd/') sshkeyd 
+          =version
+
+
+
