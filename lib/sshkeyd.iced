@@ -26,7 +26,7 @@ githubapi = (method, url, qs, cb)->
     data = JSON.parse data
   catch e
     return cb new Error "GitHub API error: #{e.message}"
-  return cb new Error "GitHub API error: {data.message}" if res.statusCode != 200
+  return cb new Error "GitHub API error: #{data.message}" if res.statusCode != 200
   cb null, data
 
 module.exports = class
@@ -97,17 +97,19 @@ module.exports = class
       await githubapi "POST", "https://github.com/login/oauth/access_token", code: rq.query.code, client_id: rq.cfg.client_id, client_secret: rq.cfg.client_secret, defer e, access
       return cb e if e
       rq.session.access_token = access_token = access.access_token
-      await githubapi "GET", "https://api.github.com/user", access_token: access_token, defer e, rq.session.user
+
+      await githubapi "GET", "https://api.github.com/user", access_token: access_token, defer e, user
       return cb e if e
-      await githubapi "GET", "https://api.github.com/user/orgs", access_token: access_token, defer e, rq.session.user.orgs
+      await githubapi "GET", "https://api.github.com/users/#{user.login}/orgs", access_token: access_token, defer e, user.orgs
       return cb e if e
-      for org in rq.session.user.orgs
+      for org in user.orgs
         await githubapi "GET", "https://api.github.com/orgs/#{org.login}/members", access_token: access_token, defer e, org.members
         return cb e if e
+      rq.session.user = user
       cb null
       return rs.redirect ''
     unless rq.session.user
-      return rs.redirect "https://github.com/login/oauth/authorize?client_id=#{rq.cfg.client_id}&state=#{rq.session.id}"
+      return rs.redirect "https://github.com/login/oauth/authorize?client_id=#{rq.cfg.client_id}&state=#{rq.session.id}&scope="
     rs.locals._csrf = rq.csrfToken()
     if rq.isAdmin = rq.session.user.login == rq.cfg.admin_username
       await exec 'which ssh', defer e, rq.bin_ssh
