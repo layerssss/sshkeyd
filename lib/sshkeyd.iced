@@ -234,7 +234,7 @@ module.exports = class
   push_keys: (id_pub, bin_ssh, keys, server, cb)=>
     server_arr = server.split ','
     process.stdout.write "syncing #{keys.length} keys to #{server}... "
-    await exec "echo '#{keys.join '\\n'}'|#{bin_ssh} -o PasswordAuthentication=no -p #{server_arr[1]||22} #{server_arr[0]} 'mkdir -p .ssh && cat > .ssh/authorized_keys'", defer e, out, err
+    await exec "printf '#{keys.join '\\n'}'|#{bin_ssh} -o PasswordAuthentication=no -p #{server_arr[1]||22} #{server_arr[0]} 'mkdir -p .ssh && cat > .ssh/authorized_keys'", defer e, out, err
     if e
       process.stdout.write 'error!\r\n'
       console.error e.message
