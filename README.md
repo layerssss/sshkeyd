@@ -1,7 +1,7 @@
 sshkeyd
 =======
 
-manage ssh keys with ease
+Forget about ssh keys
 
 * you don't need to tell me public keys of yours & others, I can get them from your GitHub account.
 * you don't need to tell me who's your teamates, I can get them from your GitHub organizations.
