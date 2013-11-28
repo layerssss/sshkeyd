@@ -3,8 +3,8 @@ sshkeyd
 
 Forget about ssh keys
 
-* you don't need to tell me public keys of yours & others, I can get them from your GitHub account.
 * you don't need to tell me who's your teamates, I can get them from your GitHub organizations.
+* don't give me public keys of yours & others, I can get them from your(their) GitHub account.
 * you don't need to worry about other keys in server, I can pluck them out for you.
 * all you need to do is tell me where is the server, and let me do the rest.
 * bonus! teamates can also visit the dashboard and see which servers are authorized to them.
