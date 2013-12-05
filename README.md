@@ -3,6 +3,7 @@ sshkeyd
 
 Forget about ssh keys
 
+* [中文说明](README_zh.md)
 * you don't need to tell me who's your teamates, I can get them from your GitHub organizations.
 * don't give me public keys of yours & others, I can get them from your(their) GitHub account.
 * you don't need to worry about other keys in server, I can pluck them out for you.
