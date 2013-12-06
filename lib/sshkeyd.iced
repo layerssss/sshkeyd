@@ -136,7 +136,7 @@ module.exports = class
       return cb e if e
 
 
-    rs.locals.other_orgs = other_orgs = []
+    rs.locals.other_orgs = other_orgs = ["_personal"]
     if rq.isAdmin
       for org, servers of rq.cfg.orgs
         if _.every(rq.session.user.orgs, (o)-> o.login != org)
