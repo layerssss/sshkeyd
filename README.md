@@ -14,7 +14,7 @@ Forget about ssh keys
 
 ## Installation
 
-* install `nodejs`, `git` (`homebrew install nodejs git`, maybe)
+* install `nodejs` (`homebrew install nodejs`, maybe)
 * `sudo npm install sshkeyd -g`
 * `sshkeyd`
 * open your browser and go to [http://localhost:10000/](http://localhost:10000/)
