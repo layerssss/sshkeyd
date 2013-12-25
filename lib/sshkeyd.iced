@@ -7,6 +7,7 @@ util = require 'util'
 _ = require 'underscore'
 {
   exec
+  spawn
 } = require 'child_process'
 
 _package = require '../package.json'
@@ -257,10 +258,31 @@ module.exports = class
   push_keys: (id_pub, bin_ssh, keys, server, cb)=>
     server_arr = server.split ','
     process.stdout.write "syncing #{keys.length} keys to #{server}... "
-    await exec "printf '#{keys.join '\\n'}'|#{bin_ssh} -o PasswordAuthentication=no StrictHostKeyChecking=no -p #{server_arr[1]||22} #{server_arr[0]} 'mkdir -p .ssh && cat > .ssh/authorized_keys'", defer e, out, err
-    if e
+
+    ssh = spawn bin_ssh, [
+        "-o"
+        "PasswordAuthentication=no"
+        "-o"
+        "StrictHostKeyChecking=no"
+        "-o"
+        "PasswordAuthentication=no"
+        "-o"
+        "GSSAPIAuthentication=no"
+        "-o"
+        "ChallengeResponseAuthentication=no"
+        "-p"
+        server_arr[1]||22
+        server_arr[0]
+        'mkdir -p .ssh && cat - > .ssh/authorized_keys'
+      ], stdio: ['pipe', 1, 2]
+    ssh.stdin.setEncoding 'utf8'
+    for key in keys
+      ssh.stdin.write key
+      ssh.stdin.write '\n'
+    ssh.stdin.end()
+    await ssh.on 'close', defer code
+    if code
       process.stdout.write 'error!\r\n'
-      console.error e.message
       return cb new Error """
       Error syncing keys to `#{server}`. Use the following command to authorize your self on this host.
 
