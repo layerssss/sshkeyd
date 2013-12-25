@@ -9,7 +9,7 @@ mixin member(org, members, member)
         if member.avatar_url
           img.img-circle(style='width: 30px;',src=member.avatar_url,title=member.login)
         else
-          img.img-circle(style='width: 30px;',src='assets/github.png',title='#{member.login} is not a member of #{org}')
+          img.img-circle(style='width: 30px;',src='assets/github.png',title='#{member.login}')
       .hidden-lg-md
         img.img-circle(style='width: 30px;',src=member.avatar_url||'assets/github.png')
         span(style='margin: 0 .5em;color: #000;text-decoration:none;')=member.login
@@ -49,15 +49,26 @@ mixin org(org)
               for member, i in members
                 +tick(org.login, server, member.login, i)
     if isAdmin
-      form.form-inline(method='post')
+      form.form-inline(method='post',style='margin: .5em;')
         input(type='hidden',name='server[org]',value=org.login)
         input(type='hidden',name='_csrf',value=_csrf)
         .form-group
           label.sr-only server host
-          input.form-control(type='email', placeholder='user@host[,port]', name='server[host]')
-        button.btn.btn-success(type='submit')
-          i.fa.fa-plus
-          |Add to #{org.login}
+          input.input-server.form-control(type='email', value='', placeholder='user@host[,port]', name='server[host]')
+        .form-group
+          button.btn.btn-success.form-control(type='submit')
+            i.fa.fa-plus
+            |Add to #{org.login}
+      form.form-inline(method='post',style='margin: .5em;')
+        input(type='hidden',name='member[org]',value=org.login)
+        input(type='hidden',name='_csrf',value=_csrf)
+        .form-group
+          label.sr-only member login
+          input.input-member.form-control(type='text', value='', placeholder='username', name='member[login]')
+        .form-group
+          button.btn.btn-success.form-control(type='submit')
+            i.fa.fa-plus
+            |Add to #{org.login}
         
 block content
   ul.nav.nav-tabs
@@ -65,23 +76,26 @@ block content
       a.dropdown-toggle(data-toggle='dropdown',href='#')
         span#label_org
           img.img-circle(style='width: 25px;',src=active_org.avatar_url||'assets/github.png')
-          =active_org.login
+          =active_org.login||'others..'
         span.caret
         ul.dropdown-menu
           for org in user.orgs.concat(other_orgs)
             li(class=active_org.login==org.login?'active':undefined)
               a(href="#org_#{org.login}",data-toggle="tab",onclick="$('#label_org').html($(this).html())")
                 img.img-circle(style='width: 25px;',src=org.avatar_url||'assets/github.png')
-                =org.login
+                =org.login||'others..'
     for org in user.orgs.concat(other_orgs)
       li.hidden-xs(class=active_org.login==org.login?'active':undefined)
         a(href="#org_#{org.login}",data-toggle="tab")
           img.img-circle(style='width: 25px;',src=org.avatar_url||'assets/github.png')
-          =org.login
+          =org.login||'others..'
   .tab-content
     for org in user.orgs.concat(other_orgs)
       .tab-pane.fade(class=active_org.login==org.login?'in active':undefined, id='org_#{org.login}')
         +org(org)
+  script.
+    var added_type = !{JSON.stringify(added_type)};
+    var added_value = !{JSON.stringify(added_value)};
   :coffeescript
     $ ->
       $('[title]').tooltip()
@@ -99,7 +113,7 @@ block content
             document.write xhr.responseText
           complete: ->
             $('body').removeClass 'waiting'
-      $('.tab-pane.active .form-inline input[type="email"]').focus()
+      $('.tab-pane.active .input-' + added_type).focus().val(added_value).select()
       $('.member-link').click (ev)->
         ev.preventDefault()
         $('.tab-pane.in .org tr>*').removeClass('member-active').filter(":nth-child(#{$(@).parent().index() + 2})").addClass 'member-active'

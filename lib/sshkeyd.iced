@@ -64,6 +64,7 @@ module.exports = class
     handler.get '/', @route_dashboard
     handler.post '/', @route_authorize
     handler.post '/', @route_add_server
+    handler.post '/', @route_add_member
     handler.delete '/', @route_delete_server
     handler.use @route_error
     cb null, handler
@@ -162,6 +163,8 @@ module.exports = class
       isAdmin: rq.isAdmin
       user: rq.session.user
       orgs: rq.cfg.orgs
+      added_type: rq.session.added_type||'server'
+      added_value: rq.session.added_value||''
 
 
 
@@ -186,11 +189,31 @@ module.exports = class
       if rq.body.server.host = rq.body.server.host.trim()
         await @push_keys rq.id_pub, rq.bin_ssh, [rq.id_pub], rq.body.server.host, defer e
         return cb e if e
+
         (rq.cfg.orgs[rq.body.server.org]?= {})[rq.body.server.host] ?= []
 
         await @save_config rq.cfg, defer e
         return cb e if e
+      rq.session.added_type = 'server'
+      rq.session.added_value = rq.body.server.host
       rq.session.active_org = rq.body.server.org
+      return rs.redirect '' 
+    cb null
+
+  route_add_member: (rq, rs, cb)=>
+    if rq.isAdmin && rq.body.member
+      if rq.body.member.login = rq.body.member.login.trim()
+        await @get_id_pub rq.session.access_token, rq.body.member.login, defer e, keys
+        return cb e if e
+
+        for host, members of rq.cfg.orgs[rq.body.member.org]?= {}
+          members.push rq.body.member.login if -1 == members.indexOf rq.body.member.login
+
+        await @save_config rq.cfg, defer e
+        return cb e if e
+      rq.session.added_type = 'member'
+      rq.session.added_value = rq.body.member.login
+      rq.session.active_org = rq.body.member.org
       return rs.redirect '' 
     cb null
   route_delete_server: (rq, rs, cb)=>
@@ -249,11 +272,12 @@ module.exports = class
     cb null
 
   get_id_pub: (access_token, github_login, cb)=>
-    keys = (@_sshkey_cache?= {})[github_login]
+    @_sshkey_cache?= {}
+    keys = @_sshkey_cache[github_login]
     return cb null, keys if keys?
     await githubapi "GET", "https://api.github.com/users/#{github_login}/keys", access_token: access_token, defer e, keys
     return cb e if e
-    cb null, keys.map (key)-> key.key
+    cb null, @_sshkey_cache[github_login] = keys.map (key)-> key.key
 
   save_config: (cfg, cb)=>
     await fs.writeFile @path_cfg, (JSON.stringify cfg, null, '  '), 'utf8', defer e

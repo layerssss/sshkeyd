@@ -1,6 +1,6 @@
 {
   "name": "sshkeyd",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "sshkeyd =======",
   "main": "index.js",
   "scripts": {
@@ -20,12 +20,12 @@
   },
   "homepage": "https://github.com/layerssss/sshkeyd",
   "dependencies": {
-    "iced-coffee-script": "~1.6.3-g",
-    "express": "~3.4.4",
-    "request": "~2.27.0",
-    "jade": "~0.35.0",
-    "marked": "~0.2.10",
-    "underscore": "~1.5.2",
-    "coffee-script": "~1.6.3"
+    "iced-coffee-script": "1.6.3-g",
+    "express": "3.4.4",
+    "request": "2.27.0",
+    "jade": "0.35.0",
+    "marked": "0.2.10",
+    "underscore": "1.5.2",
+    "coffee-script": "1.6.3"
   }
 }
