@@ -188,7 +188,7 @@ module.exports = class
   route_add_server: (rq, rs, cb)=>
     if rq.isAdmin && rq.body.server
       if rq.body.server.host = rq.body.server.host.trim()
-        await @push_keys rq.id_pub, rq.bin_ssh, [rq.id_pub], rq.body.server.host, defer e
+        await @push_keys rq.id_pub, rq.bin_ssh, rq.id_pub, rq.body.server.host, defer e
         return cb e if e
 
         (rq.cfg.orgs[rq.body.server.org]?= {})[rq.body.server.host] ?= []
